@@ -1,10 +1,16 @@
 package utility;
 
 
+import utility.math.Face;
+import utility.math.Vector3f;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class OBJLoader {
 
@@ -21,10 +27,10 @@ public class OBJLoader {
                     // Also do nothing
                     break;
                 case "v":                           // Vertex
-                    // Parse vertex and add to model
+                    model.addVertex(parseVertex(line));
                     break;
                 case "f":                           // Face
-                    // Parse face
+                    model.addFace(parseFace(line));
                     break;
                 default:
                     throw new IOException("Error parsing line on OBJ file: " + line);
@@ -32,8 +38,22 @@ public class OBJLoader {
             line = bufferedReader.readLine();
         }
 
-
+        bufferedReader.close();
 
         return model;
+    }
+
+    private static Vector3f parseVertex(String line) {
+        String[] vector = line.split(" ");
+        float xCoord = Float.valueOf(vector[1]);
+        float yCoord = Float.valueOf(vector[2]);
+        float zCoord = Float.valueOf(vector[3]);
+        return new Vector3f(xCoord, yCoord, zCoord);
+    }
+
+    private static Face parseFace(String line) {               // Assumes no normals
+        List<String> face = new ArrayList<>(Arrays.asList(line.split(" ")));
+        face.remove(0);
+        return new Face(face.stream().mapToInt(Integer::parseInt).toArray());
     }
 }
