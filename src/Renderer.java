@@ -1,18 +1,33 @@
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
 
+import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.FPSAnimator;
+import utility.Model;
+import utility.OBJLoader;
 
 import javax.swing.*;
 
+import java.io.File;
+import java.io.IOException;
+
+import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
+import static com.jogamp.opengl.GL.GL_LEQUAL;
+import static com.jogamp.opengl.GL.GL_NICEST;
+import static com.jogamp.opengl.GL2ES1.GL_PERSPECTIVE_CORRECTION_HINT;
+import static com.jogamp.opengl.fixedfunc.GLLightingFunc.GL_SMOOTH;
+
 public class Renderer implements GLEventListener {
+
+    private GLU glu;
+    private Model model;
 
     public static void main(String[] args) {
         new Renderer().setup();
     }
 
     private void setup() {
-        final GLProfile glProfile = GLProfile.get(GLProfile.GL3);                  // Use OpenGL3
+        final GLProfile glProfile = GLProfile.get(GLProfile.GL2);                  // Use OpenGL2
         GLCapabilities glCapabilities = new GLCapabilities(glProfile);       //
 
         final GLCanvas canvas = new GLCanvas(glCapabilities);
@@ -43,11 +58,27 @@ public class Renderer implements GLEventListener {
         frame.setSize(frame.getContentPane().getPreferredSize());
 
         frame.setVisible(true);
+
+        animator.start();
     }
 
     @Override
     public void init(GLAutoDrawable glAutoDrawable) {
-//        GL4 gl = glAutoDrawable.getGL().getGL4();
+        GL2 gl = glAutoDrawable.getGL().getGL2();
+        glu = new GLU();
+        gl.glClearColor(1f, 1f, 1f, 1f);
+        gl.glClearDepth(1.0f);
+        gl.glEnable(GL_DEPTH_TEST);
+        gl.glDepthFunc(GL_LEQUAL);
+        gl.glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+        gl.glShadeModel(GL_SMOOTH);
+
+        try {
+            model = OBJLoader.loadOBJFile(new File("airboat.obj"));
+        } catch(IOException e) {
+            System.out.println(e.toString());
+        }
+
     }
 
     @Override
@@ -57,6 +88,16 @@ public class Renderer implements GLEventListener {
 
     @Override
     public void display(GLAutoDrawable glAutoDrawable) {
+        GL2 gl = glAutoDrawable.getGL().getGL2();
+        gl.glLoadIdentity();
+        gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
+
+        gl.glTranslatef(0,0,-1);
+        gl.glScalef(0.1f, 0.1f, 0.1f);
+
+        model.draw(glAutoDrawable);
+
+        gl.glFlush();
 
     }
 

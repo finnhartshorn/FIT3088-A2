@@ -8,5 +8,7 @@ public class Face {
         this.vertexIndices = vertexIndices;
     }
 
-
+    public int[] getVertexIndices() {
+        return vertexIndices;
+    }
 }

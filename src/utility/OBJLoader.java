@@ -32,8 +32,14 @@ public class OBJLoader {
                 case "f":                           // Face
                     model.addFace(parseFace(line));
                     break;
+                case "g":
+                    break;
+                case "s":
+                    break;
+                case "":
+                    break;
                 default:
-                    throw new IOException("Error parsing line on OBJ file: " + line);
+                    throw new IOException("Error parsing line on OBJ file: " + line.split(" ")[0] + " | " + line);
             }
             line = bufferedReader.readLine();
         }
