@@ -66,7 +66,7 @@ public class Renderer implements GLEventListener {
     public void init(GLAutoDrawable glAutoDrawable) {
         GL2 gl = glAutoDrawable.getGL().getGL2();
         glu = new GLU();
-        gl.glClearColor(1f, 1f, 1f, 1f);
+        gl.glClearColor(0f, 0f, 0f, 1f);
         gl.glClearDepth(1.0f);
         gl.glEnable(GL_DEPTH_TEST);
         gl.glDepthFunc(GL_LEQUAL);
