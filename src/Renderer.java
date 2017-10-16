@@ -4,6 +4,7 @@ import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.FPSAnimator;
 
+import utility.Material;
 import utility.Model;
 import utility.OBJLoader;
 
@@ -21,6 +22,7 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
     private GLU glu;
     private Model model;
     private boolean perspective = true;
+    private boolean wireframe = false;
     private float xRotation = 0f;
     private float yRotation = 0f;
     private float zRotation = 0f;
@@ -125,11 +127,20 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
 
         gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, lightPosition, 0);
 
+
+        if (wireframe) {
+            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
+        } else {
+            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+        }
+
+        Material temp = Material.whitePlatic;
+        temp.apply(glAutoDrawable);
+
         if (leftMouseDown) {
             Point mouseCoords = MouseInfo.getPointerInfo().getLocation();
             float xDelta = (mouseCoords.x - mousePrevCoords.x) * (rotationFactor/2);
             float yDelta = (mouseCoords.y - mousePrevCoords.y) * (rotationFactor/2);
-            System.out.println(xDelta);
             if (shiftPressed) {
                 translation[0] += (xDelta)/100;
                 translation[1] -= (yDelta)/100;
@@ -220,6 +231,8 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
                 break;
             case KeyEvent.VK_P:
                 perspective = !perspective;
+            case KeyEvent.VK_R:
+                wireframe = !wireframe;
         }
     }
 
