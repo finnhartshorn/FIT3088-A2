@@ -71,25 +71,34 @@ public class Model {
     }
 
     private void drawFace(GLAutoDrawable glAutoDrawable, int faceIndex) {
+        drawFace(glAutoDrawable, faceIndex, true);
+    }
+
+    private void drawFace(GLAutoDrawable glAutoDrawable, int faceIndex, boolean perVertexNormals) {
         GL2 gl = glAutoDrawable.getGL().getGL2();
         int[] vertexIndices = faces.get(faceIndex);
 
         gl.glBegin(GL_TRIANGLES);
 
         gl.glColor3f(0.5f, 0.5f, 0.5f);
-//        float[] n = faceNormals.get(faceIndex);
-//        gl.glNormal3f(n[0], n[1], n[2]);
-        for (int vertexIndex: vertexIndices) {
-            float[] n = normals.get(vertexIndex-1);
+        if (!perVertexNormals) {
+            float[] n = faceNormals.get(faceIndex);
             gl.glNormal3f(n[0], n[1], n[2]);
+        }
+
+        for (int vertexIndex: vertexIndices) {
+            if (perVertexNormals) {
+                float[] n = normals.get(vertexIndex-1);
+                gl.glNormal3f(n[0], n[1], n[2]);
+            }
             float[] v = vertices.get(vertexIndex-1);
             gl.glVertex3f(v[0], v[1], v[2]);
         }
         gl.glEnd();
     }
 
-    public void draw(GLAutoDrawable glAutoDrawable) {
-        IntStream.range(0, faces.size()).forEach(n -> drawFace(glAutoDrawable, n));
+    public void draw(GLAutoDrawable glAutoDrawable, boolean perVertexNormals) {
+        IntStream.range(0, faces.size()).forEach(n -> drawFace(glAutoDrawable, n, perVertexNormals));
     }
 
 }

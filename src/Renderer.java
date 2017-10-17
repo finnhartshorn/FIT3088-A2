@@ -22,71 +22,37 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
     private GLU glu;
     private Model model;
     private boolean perspective = true;
-    private boolean wireframe = false;
+    private boolean surfaceRendering = true;
+    private boolean vertexNormals = true;
     private float xRotation = 0f;
     private float yRotation = 0f;
     private float zRotation = 0f;
-    private float rotationFactor = 0.8f;
+    private float rotationFactor = 0.8f;                        // How fast the keys and mouse will cause things to rotate
     private float zoomFactor = 0f;
     private boolean light = true;
+    private Material currentMaterial = Material.materials.get("Gold");
     private Point mousePrevCoords;
     private boolean leftMouseDown = false;
     private boolean shiftPressed = false;
     private boolean ctrlPressed = false;
     private float[] translation = {0f, 0f, -2f};
 
-    private float[] ambient = {1.0f, 1.0f, 1.0f , 1.0f};
-    private float[] diffuse = {1.0f, 1.0f, 1.0f , 1.0f};
+//    private float[] ambient = {1.0f, 1.0f, 1.0f , 1.0f};
+//    private float[] diffuse = {1.0f, 1.0f, 1.0f , 1.0f};
+
+    float ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    float diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    float specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     private float[] lightPosition = {0.0f, 0.0f, 5.0f, 1.0f};
+    float lmodel_ambient[] = { 0.4f, 0.4f, 0.4f, 1.0f };
+    float local_view[] = { 0.0f };
 
-    public static void main(String[] args) {
-        new Renderer().setup();
-    }
-
-    private void setup() {
-        final GLProfile glProfile = GLProfile.get(GLProfile.GL2);                  // Use OpenGL2
-        GLCapabilities glCapabilities = new GLCapabilities(glProfile);       //
-
-        final GLCanvas canvas = new GLCanvas(glCapabilities);
-        Renderer renderer = new Renderer();
-
-        canvas.addGLEventListener(renderer);
-        canvas.addKeyListener(renderer);
-        canvas.addMouseListener(renderer);
-
-        canvas.setSize(1074, 768);
-
-        final FPSAnimator animator = new FPSAnimator(canvas, 60, true);
-
-        final JFrame frame = new JFrame("Test");
-
-        frame.getContentPane().add(canvas);
-
-
-
-        // Kill
-        frame.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                if(animator.isStarted()) {
-                    animator.stop();
-                }
-                System.exit(0);
-            }
-        });
-
-        frame.setSize(frame.getContentPane().getPreferredSize());
-
-        frame.setVisible(true);
-
-        animator.start();
-    }
 
     @Override
     public void init(GLAutoDrawable glAutoDrawable) {
         GL2 gl = glAutoDrawable.getGL().getGL2();
         glu = new GLU();
-        gl.glClearColor(0f, 0f, 0f, 1f);
+        gl.glClearColor(0.1f, 0.1f, 0.1f, 0.0f);
         gl.glClearDepth(1.0f);
         gl.glEnable(GL2.GL_DEPTH_TEST);
         gl.glEnable(GL2.GL_LIGHTING);
@@ -97,11 +63,13 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
         gl.glEnable(GL2.GL_TEXTURE_2D);      // Enable Textures
         gl.glShadeModel(GL2.GL_SMOOTH);
 
-        gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_AMBIENT, ambient, 0);
-        gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_DIFFUSE, diffuse, 0);
-        gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, lightPosition, 0);
+        gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_SPECULAR, ambient, 0);
+        gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_DIFFUSE, diffuse, 0);
+        gl.glLightfv(GL2.GL_LIGHT0, GL2.GL_POSITION, lightPosition, 0);
+        gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, lmodel_ambient, 0);
+        gl.glLightModelfv(GL2.GL_LIGHT_MODEL_LOCAL_VIEWER, local_view, 0);
 
-        gl.glEnable(GL2.GL_LIGHT1);
+        gl.glEnable(GL2.GL_LIGHT0);
 
         try {
             model = OBJLoader.loadOBJFile(new File("airboat.obj"));
@@ -128,14 +96,13 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
         gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, lightPosition, 0);
 
 
-        if (wireframe) {
-            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
-        } else {
+        if (surfaceRendering) {
             gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);
+        } else {
+            gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
         }
 
-        Material temp = Material.whitePlatic;
-        temp.apply(glAutoDrawable);
+        currentMaterial.apply(glAutoDrawable);
 
         if (leftMouseDown) {
             Point mouseCoords = MouseInfo.getPointerInfo().getLocation();
@@ -153,6 +120,10 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
             mousePrevCoords = mouseCoords;
         }
 
+        int[] windowSize = {0,0,0,0};
+        gl.glGetIntegerv( GL2.GL_VIEWPORT, windowSize, 0);
+        _reshape(glAutoDrawable, windowSize[2], windowSize[3]);
+
         gl.glTranslatef(translation[0], translation[1], translation[2]);
         gl.glScalef(0.1f, 0.1f, 0.1f);
 
@@ -160,18 +131,17 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
         gl.glRotatef(yRotation, 0f, 1f, 0f);
         gl.glRotatef(zRotation, 0f, 0f, 1f);
 
-        model.draw(glAutoDrawable);
+        model.draw(glAutoDrawable, vertexNormals);
 
         gl.glFlush();
     }
 
-    public void _reshape(GLAutoDrawable glAutoDrawable, int width, int height) {
+    private void _reshape(GLAutoDrawable glAutoDrawable, int width, int height) {
         GL2 gl = glAutoDrawable.getGL().getGL2();
         if (height <= 0) { height = 1; }
         final float h=(float)width/(float)height;
         gl.glViewport(0, 0, width, height);
         gl.glMatrixMode(GL2.GL_PROJECTION);
-//        gl.glPushMatrix();
         gl.glLoadIdentity();
 
         if (perspective) {
@@ -204,16 +174,16 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
                 yRotation += rotationFactor;
                 break;
             case KeyEvent.VK_X:
-                xRotation -= rotationFactor;
-                break;
-            case KeyEvent.VK_W:
                 xRotation += rotationFactor;
                 break;
+            case KeyEvent.VK_W:
+                xRotation -= rotationFactor;
+                break;
             case KeyEvent.VK_Z:
-                zRotation -= rotationFactor;
+                zRotation += rotationFactor;
                 break;
             case KeyEvent.VK_E:
-                zRotation += rotationFactor;
+                zRotation -= rotationFactor;
                 break;
             case KeyEvent.VK_ADD:                                   // Zooming works for both the -/+ and -/=
             case KeyEvent.VK_EQUALS:
@@ -229,10 +199,6 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
             case KeyEvent.VK_CONTROL:
                 ctrlPressed = true;
                 break;
-            case KeyEvent.VK_P:
-                perspective = !perspective;
-            case KeyEvent.VK_R:
-                wireframe = !wireframe;
         }
     }
 
@@ -277,5 +243,25 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
     @Override
     public void mouseExited(MouseEvent e) {
 
+    }
+
+    public void setMaterial(String material) {
+        this.currentMaterial = Material.materials.get(material);
+    }
+
+    public void setPerspective(boolean perspective) {
+        this.perspective = perspective;
+    }
+
+    public void setSurfaceRendering(boolean surfaceRendering) {
+        this.surfaceRendering = surfaceRendering;
+    }
+
+    public void setVertexNormals(boolean vertexNormals) {
+        this.vertexNormals = vertexNormals;
+    }
+
+    public void toggleLight() {
+        light = !light;
     }
 }

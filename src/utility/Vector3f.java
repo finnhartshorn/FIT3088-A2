@@ -10,13 +10,13 @@ public class Vector3f {
         float[] b = { 0f, 0f, 0f };
 
 
-        a[0] = face.get(0)[0] - face.get(1)[0];
-        a[1] = face.get(0)[1] - face.get(1)[1];
-        a[2] = face.get(0)[2] - face.get(1)[2];
+        a[0] = face.get(1)[0] - face.get(0)[0];
+        a[1] = face.get(1)[1] - face.get(0)[1];
+        a[2] = face.get(1)[2] - face.get(0)[2];
 
-        b[0] = face.get(1)[0] - face.get(2)[0];
-        b[1] = face.get(1)[1] - face.get(2)[1];
-        b[2] = face.get(1)[2] - face.get(2)[2];
+        b[0] = face.get(2)[0] - face.get(0)[0];
+        b[1] = face.get(2)[1] - face.get(0)[1];
+        b[2] = face.get(2)[2] - face.get(0)[2];
 
         normalVector[0] = (a[1] * b[2]) - (a[2] * b[1]);
         normalVector[1] = (a[2] * b[0]) - (a[0] * b[2]);

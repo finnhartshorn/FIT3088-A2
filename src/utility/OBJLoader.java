@@ -24,7 +24,7 @@ public class OBJLoader {
                     // Do Nothing
                     break;
                 case "vn":                          // Vertex Normal
-                    // Also do nothing
+                    model.addNormal(parseVertex(line));
                     break;
                 case "v":                           // Vertex
                     model.addVertex(parseVertex(line));
@@ -53,7 +53,9 @@ public class OBJLoader {
 
         List<float[]> normals = model.getNormals();
 
-        for (int i = 0; i < model.getVertices().size(); i++) {
+        boolean missingNormals = normals.size() == 0;                       // If there aren't any normals in the OBJ file, they are calculated, otherwise just face normals are calculated
+
+        while (model.getVertices().size() > normals.size()) {
             normals.add(new float[] {0,0,0});
         }
 
@@ -63,21 +65,23 @@ public class OBJLoader {
                 faceVertices.add(model.getVertices().get(vertex-1));
             }
 
-            float[] faceNormal = calculateNormal(faceVertices);
-            model.addFaceNormal(faceNormal);
+            if (missingNormals) {
+                float[] faceNormal = calculateNormal(faceVertices);
+                model.addFaceNormal(faceNormal);
 
-            for (int vertex : face) {
-                float[] currentNormal = model.getNormals().get(vertex - 1);
-                normals.set(vertex-1, sumVectors(faceNormal, currentNormal));
+                for (int vertex : face) {
+                    float[] currentNormal = model.getNormals().get(vertex - 1);
+                    normals.set(vertex-1, sumVectors(faceNormal, currentNormal));
+                }
             }
         }
 
-        for (int i = 0; i < normals.size(); i++ ) {
-            normals.set(i, divideVector(normals.get(i), 3f));
+        if (missingNormals) {
+            for (int i = 0; i < normals.size(); i++ ) {
+                normals.set(i, divideVector(normals.get(i), 3f));
+            }
+            model.setNormals(normals);
         }
-        model.setNormals(normals);
-
-
 
         return model;
     }
