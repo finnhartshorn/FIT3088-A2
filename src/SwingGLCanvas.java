@@ -4,13 +4,17 @@ import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 public class SwingGLCanvas implements ActionListener {
     private JFrame mainFrame;
     private Renderer renderer;
+    private JFileChooser fileChooser;
 
     public static void main(String[] args) { new SwingGLCanvas().setup(); }
 
@@ -33,6 +37,9 @@ public class SwingGLCanvas implements ActionListener {
         mainFrame = new JFrame("FIT3080 A2 - Finn Hartshorn 25939556");
 
         mainFrame.getContentPane().add(canvas);
+        fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("PLY Files", "ply", "PLY"));
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("OBJ files", "obj", "OBJ"));
 
         // Kill
         mainFrame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -177,6 +184,13 @@ public class SwingGLCanvas implements ActionListener {
             case "Light":
                 renderer.toggleLight();
                 break;
+            case "Open":
+                int returnValue = fileChooser.showOpenDialog(mainFrame);
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    System.out.println(fileChooser.getCurrentDirectory());
+                    System.out.println(file.getName());
+                }
 
         }
     }

@@ -7,6 +7,8 @@ import com.jogamp.opengl.util.FPSAnimator;
 import utility.Material;
 import utility.Model;
 import utility.OBJLoader;
+import utility.PLY.TypeException;
+import utility.PLYLoader;
 
 import javax.swing.*;
 
@@ -71,12 +73,22 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
 
         gl.glEnable(GL2.GL_LIGHT0);
 
+//        try {
+//            model = OBJLoader.loadOBJFile(new File("airboat.obj"));
+//            System.out.println("Obj file loaded");
+//        } catch(IOException e) {
+//            System.out.println(e.toString());
+//        }
+
         try {
-            model = OBJLoader.loadOBJFile(new File("airboat.obj"));
-            System.out.println("Obj file loaded");
+            model = PLYLoader.loadPLYFile(new File("bun_zipper.ply"));
         } catch(IOException e) {
             System.out.println(e.toString());
+        } catch (TypeException e) {
+            System.out.println(e.toString());
         }
+
+
     }
 
     @Override
@@ -125,7 +137,7 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
         _reshape(glAutoDrawable, windowSize[2], windowSize[3]);
 
         gl.glTranslatef(translation[0], translation[1], translation[2]);
-        gl.glScalef(0.1f, 0.1f, 0.1f);
+        gl.glScalef(5f, 5f, 5f);
 
         gl.glRotatef(xRotation, 1f, 0f, 0f);
         gl.glRotatef(yRotation, 0f, 1f, 0f);
