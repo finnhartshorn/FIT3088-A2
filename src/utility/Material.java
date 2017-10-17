@@ -14,7 +14,7 @@ public class Material {
     public static HashMap<String, Material> materials;
     static {
         materials = new HashMap<>();
-        materials.put("Gold", new Material(new float[] { 0.24725f, 0.1995f, 0.0745f, 1.0f }, new float[] { 0.75164f, 0.60648f, 0.22648f, 1.0f }, new float[] {0.628281f, 0.555802f, 0.366065f, 1.0f },0.4f));
+        materials.put("Gold", new Material(new float[] { 0.24725f, 0.1995f, 0.0745f, 1.0f }, new float[] { 0.75164f, 0.60648f, 0.22648f, 1.0f }, new float[] {0.628281f, 0.555802f, 0.366065f, 1.0f },0.8f));
         materials.put("Copper", new Material(new float[] { 0.19125f, 0.0735f, 0.0225f, 1.0f }, new float[] { 0.7038f,	0.27048f, 0.0828f, 1.0f }, new float[] { 0.256777f, 0.137622f, 0.086014f, 1.0f },0.1f));
         materials.put("White Plastic", new Material(new float[] { 0.05f, 0.05f, 0.05f, 1.0f }, new float[] { 0.55f,	0.55f, 0.55f, 1.0f }, new float[] { 0.70f, 0.70f, 0.70f },0.25f));
     }

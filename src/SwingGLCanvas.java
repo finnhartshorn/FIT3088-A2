@@ -4,7 +4,6 @@ import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.FPSAnimator;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -61,7 +60,7 @@ public class SwingGLCanvas implements ActionListener {
         animator.start();
     }
 
-    public void createMenus() {
+    private void createMenus() {
         final JMenuBar menuBar = new JMenuBar();    // Create menu bar
 
         // Create menus
@@ -81,6 +80,7 @@ public class SwingGLCanvas implements ActionListener {
         exitMenuItem.setActionCommand("Exit");
 
         // Create render menu items
+        JCheckBoxMenuItem lightToggle = new JCheckBoxMenuItem("Light", true);
 
 
         // Create material Submenu items
@@ -125,6 +125,7 @@ public class SwingGLCanvas implements ActionListener {
         wireframe.addActionListener(this);
         vector.addActionListener(this);
         polygon.addActionListener(this);
+        lightToggle.addActionListener(this);
 
         // Add items to their respective menus
         fileMenu.add(openMenuItem);
@@ -146,6 +147,8 @@ public class SwingGLCanvas implements ActionListener {
         normalsSubMenu.add(vector);
         normalsSubMenu.add(polygon);
         renderMenu.add(normalsSubMenu);
+
+        renderMenu.add(lightToggle);
 
         // Add menus to the main menuBar
         menuBar.add(fileMenu);

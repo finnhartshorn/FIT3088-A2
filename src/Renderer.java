@@ -105,8 +105,14 @@ public class Renderer implements GLEventListener, KeyListener, MouseListener {
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
 
-        gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, lightPosition, 0);
+//        gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, lightPosition, 0);
 
+
+        if (light) {
+            gl.glEnable(GL2.GL_LIGHT0);
+        } else {
+            gl.glDisable(GL2.GL_LIGHT0);
+        }
 
         if (surfaceRendering) {
             gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_FILL);

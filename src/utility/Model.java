@@ -132,7 +132,7 @@ public class Model {
 
     public void calculateNormals(int offset) {
         while (vertices.size() > normals.size()) {
-            normals.add(new float[] {0,0,0});
+            normals.add(new float[] {0.0f,0.0f,0.0f});
         }
 
         for (int[] face : faces) {            // Index face, and calculate face normal and vector normals
