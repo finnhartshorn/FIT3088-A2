@@ -5,17 +5,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
-import java.util.stream.Collectors;
 
-import static utility.Vector3f.calculateNormal;
-import static utility.Vector3f.divideVector;
-import static utility.Vector3f.sumVectors;
-
+// Used to produce a Model from an OBJ file
 public class OBJLoader {
 
     public static Model loadOBJFile(File file) throws IOException{
-        Model model = new Model(-1);
+        Model model = new Model(1);
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
         String line = bufferedReader.readLine();
         while (line != null) {
@@ -44,14 +39,11 @@ public class OBJLoader {
             }
             line = bufferedReader.readLine();
         }
-
         bufferedReader.close();
 
         if (model.getNormals().size() == 0) {
-            model.calculateNormals(-1);
+            model.calculateNormals();
         }
-
-
 
         return model;
     }

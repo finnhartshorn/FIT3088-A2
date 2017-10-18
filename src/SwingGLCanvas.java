@@ -13,6 +13,7 @@ import java.io.File;
 public class SwingGLCanvas implements ActionListener {
     private JFrame mainFrame;
     private Renderer renderer;
+    private FPSAnimator animator;
     private JFileChooser fileChooser;
 
     public static void main(String[] args) { new SwingGLCanvas().setup(); }
@@ -25,15 +26,17 @@ public class SwingGLCanvas implements ActionListener {
         final GLCanvas canvas = new GLCanvas(glCapabilities);
         renderer = new Renderer();
 
+        // Adds event listeners
         canvas.addGLEventListener(renderer);
         canvas.addKeyListener(renderer);
         canvas.addMouseListener(renderer);
 
         canvas.setSize(1074, 768);
 
-        final FPSAnimator animator = new FPSAnimator(canvas, 60, true);
+        animator = new FPSAnimator(canvas, 60, true);
 
-        mainFrame = new JFrame("FIT3080 A2 - Finn Hartshorn 25939556");
+        mainFrame = new JFrame("FIT3088 A2 - Finn Hartshorn 25939556");
+        mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         mainFrame.getContentPane().add(canvas);
         fileChooser = new JFileChooser();
@@ -51,6 +54,7 @@ public class SwingGLCanvas implements ActionListener {
             }
         });
 
+
         mainFrame.setSize(mainFrame.getContentPane().getPreferredSize());
 
         createMenus();
@@ -60,6 +64,7 @@ public class SwingGLCanvas implements ActionListener {
         animator.start();
     }
 
+    // Creates menus, and adds this class as a listener
     private void createMenus() {
         final JMenuBar menuBar = new JMenuBar();    // Create menu bar
 
@@ -70,6 +75,7 @@ public class SwingGLCanvas implements ActionListener {
         JMenu projectionSubMenu = new JMenu("Projection");
         JMenu renderingSubMenu = new JMenu("Rendering");
         JMenu normalsSubMenu = new JMenu("Normals");
+        JMenu lightsSubMenu = new JMenu("Lights");
 
         // Create open menu items
         JMenuItem openMenuItem = new JMenuItem("Open");
@@ -80,14 +86,15 @@ public class SwingGLCanvas implements ActionListener {
         exitMenuItem.setActionCommand("Exit");
 
         // Create render menu items
-        JCheckBoxMenuItem lightToggle = new JCheckBoxMenuItem("Light", true);
 
 
         // Create material Submenu items
-        JRadioButtonMenuItem goldMaterial = new JRadioButtonMenuItem("Gold", true);
+        JRadioButtonMenuItem defaultMaterial = new JRadioButtonMenuItem("Default", true);
+        JRadioButtonMenuItem goldMaterial = new JRadioButtonMenuItem("Gold");
         JRadioButtonMenuItem copperMaterial = new JRadioButtonMenuItem("Copper");
         JRadioButtonMenuItem whitePlasticMaterial = new JRadioButtonMenuItem("White Plastic");
         ButtonGroup materialGroup = new ButtonGroup();
+        materialGroup.add(defaultMaterial);
         materialGroup.add(goldMaterial);
         materialGroup.add(copperMaterial);
         materialGroup.add(whitePlasticMaterial);
@@ -113,9 +120,15 @@ public class SwingGLCanvas implements ActionListener {
         normalsGroup.add(vector);
         normalsGroup.add(polygon);
 
+        // Create lights submenu items
+        JCheckBoxMenuItem frontLightToggle = new JCheckBoxMenuItem("Front Light", true);
+        JCheckBoxMenuItem behindLightToggle = new JCheckBoxMenuItem("Behind Light", false);
+        JCheckBoxMenuItem aboveLightToggle = new JCheckBoxMenuItem("Above Light", false);
+
         // Add this as a listener to all menu actions
         openMenuItem.addActionListener(this);
         exitMenuItem.addActionListener(this);
+        defaultMaterial.addActionListener(this);
         goldMaterial.addActionListener(this);
         copperMaterial.addActionListener(this);
         whitePlasticMaterial.addActionListener(this);
@@ -125,12 +138,15 @@ public class SwingGLCanvas implements ActionListener {
         wireframe.addActionListener(this);
         vector.addActionListener(this);
         polygon.addActionListener(this);
-        lightToggle.addActionListener(this);
+        frontLightToggle.addActionListener(this);
+        behindLightToggle.addActionListener(this);
+        aboveLightToggle.addActionListener(this);
 
         // Add items to their respective menus
         fileMenu.add(openMenuItem);
         fileMenu.add(exitMenuItem);
 
+        materialSubMenu.add(defaultMaterial);
         materialSubMenu.add(goldMaterial);
         materialSubMenu.add(copperMaterial);
         materialSubMenu.add(whitePlasticMaterial);
@@ -148,19 +164,25 @@ public class SwingGLCanvas implements ActionListener {
         normalsSubMenu.add(polygon);
         renderMenu.add(normalsSubMenu);
 
-        renderMenu.add(lightToggle);
+        lightsSubMenu.add(aboveLightToggle);
+        lightsSubMenu.add(frontLightToggle);
+        lightsSubMenu.add(behindLightToggle);
+        renderMenu.add(lightsSubMenu);
 
         // Add menus to the main menuBar
         menuBar.add(fileMenu);
         menuBar.add(renderMenu);
 
+        // Set the menubar
         mainFrame.setJMenuBar(menuBar);
     }
 
+
+    // Handles actions and calls the required methods of renderer
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println(e.getActionCommand());
         switch (e.getActionCommand()) {
+            case "Default":
             case "Gold":
             case "Copper":
             case "White Plastic":
@@ -184,17 +206,28 @@ public class SwingGLCanvas implements ActionListener {
             case "Per-Face":
                 renderer.setVertexNormals(false);
                 break;
-            case "Light":
-                renderer.toggleLight();
+            case "Front Light":
+                renderer.toggleLight(1);
+                break;
+            case "Behind Light":
+                renderer.toggleLight(2);
+                break;
+            case "Above Light":
+                renderer.toggleLight(3);
                 break;
             case "Open":
                 int returnValue = fileChooser.showOpenDialog(mainFrame);
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
                     File file = fileChooser.getSelectedFile();
-                    System.out.println(fileChooser.getCurrentDirectory());
-                    System.out.println(file.getName());
+                    renderer.loadFile(file);
                 }
-
+                break;
+            case "Exit":
+                mainFrame.dispose();
+                if(animator.isStarted()) {
+                    animator.stop();
+                }
+                System.exit(0);
         }
     }
 }

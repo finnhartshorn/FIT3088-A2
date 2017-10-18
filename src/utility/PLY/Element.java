@@ -1,9 +1,9 @@
 package utility.PLY;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+// Defines an element from a PLY file, contains a set of properties
 public class Element {
     private String name;
     private HashMap<String, Property> propertyMap;
@@ -17,6 +17,7 @@ public class Element {
         propertyMap = new HashMap<>();
     }
 
+    // Returns whether the length each property is equal the length originally passed in
     public boolean validate() {
         for(Property property : propertyList) {
             if (property.getData().size() != length) {

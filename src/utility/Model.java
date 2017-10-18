@@ -15,7 +15,7 @@ import static utility.Vector3f.calculateNormal;
 import static utility.Vector3f.divideVector;
 import static utility.Vector3f.sumVectors;
 
-
+// A class for holding all the required data to render a model, also contains methods for calculating the face and vector normals
 public class Model {
     private int offset;
     private List<float[]> vertices = new ArrayList<float[]>();
@@ -23,7 +23,12 @@ public class Model {
     private List<float[]> normals = new ArrayList<float[]>();
     private List<float[]> faceNormals = new ArrayList<>();
 
+
     public Model(int offset) { this.offset = offset; }
+
+    public Model() {
+        this(0);
+    }
 
     public void addVertex(float[] vertex) {
         vertices.add(vertex);
@@ -130,7 +135,7 @@ public class Model {
         return triangleList;
     }
 
-    public void calculateNormals(int offset) {
+    public void calculateNormals() {
         while (vertices.size() > normals.size()) {
             normals.add(new float[] {0.0f,0.0f,0.0f});
         }

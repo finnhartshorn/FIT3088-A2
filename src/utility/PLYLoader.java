@@ -8,16 +8,15 @@ import utility.PLY.TypeException;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static utility.Vector3f.calculateNormal;
-import static utility.Vector3f.divideVector;
-import static utility.Vector3f.sumVectors;
-
+/*
+ * A Class for parsing PLY files.
+ *  Every element and property is read in, however only the vertex and face elements are used to produce a model for rendering
+ */
 public class PLYLoader {
 
     public static Model loadPLYFile(File file) throws IOException, TypeException {
-        Model model = new Model(0);
+        Model model = new Model();
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
         String line = bufferedReader.readLine();
         boolean header = true;
@@ -33,7 +32,7 @@ public class PLYLoader {
                     case "comment":                           // Comment
                         // Do Nothing
                         break;
-                    case "element":
+                    case "element":                                                 // Create a new element and add it to the list and Hashmap, so it can be found via name and index
                         Element temp = parseElement(line);
                         elementList.add(temp);
                         elementMap.put(temp.getName(), temp);
@@ -48,9 +47,7 @@ public class PLYLoader {
                         throw new IOException("Error parsing line on PLY file: " + line.split(" ")[0] + " | " + line);
                 }
             } else {
-                System.out.println("Finished Header");
                 for(Element element : elementList) {                                                                        // After elements are read, parse data for each element
-                    System.out.println(element.getName() + " : " + element.getPropertyList().size());
                     for (int i = 0; i < element.getLength(); i++) {
                         element.addData(line);
                         line = bufferedReader.readLine();
@@ -61,15 +58,15 @@ public class PLYLoader {
             line = bufferedReader.readLine();
         }
 
-        System.out.println("Finished Reading PLY File");
         bufferedReader.close();
 
-        for(Element element : elementList) {
+        for(Element element : elementList) {            // Check each element to make sure it is the correct size
             if (!element.validate()) {
                 System.out.println("ERROR");
             }
         }
 
+        // Get the vertex elements and adds them to the model
         Element vertexElement = elementMap.get("vertex");
         ArrayList<Float> x = vertexElement.getPropertyMap().get("x").getData();
         ArrayList<Float> y = vertexElement.getPropertyMap().get("y").getData();
@@ -79,24 +76,22 @@ public class PLYLoader {
             model.addVertex(new float[]{x.get(i), y.get(i), z.get(i)});
         }
 
-        System.out.println("Vertices Loaded");
-
+        // Gets the face elements and adds them to teh model
         Element faceElement = elementMap.get("face");
         ArrayList<Integer[]> faces = faceElement.getPropertyMap().get("vertex_indices").getData();
         for (int i = 0; i < faces.size(); i++) {
             Object[] face = faces.get(i);
             model.addFace(Arrays.stream(Arrays.copyOf(face, face.length, Integer[].class)).mapToInt(Integer::intValue).toArray());                      // This is a bit of a mess, used to convert Integer[] to int[]
         }
-
-        model.calculateNormals(0);
+        // Calculates normals
+        model.calculateNormals();
 
         return model;
-
     }
 
+    // Parses a property and adds it to the given element
     private static void parseProperty(Element element, String line) {
         String[] propertytString = line.split(" ");
-        System.out.println("Property: " + propertytString[1] + " : "+ propertytString[2]);
         switch (propertytString[1]) {
             case "char":                                                                // These are all treated as ints. No data is lost, it's just a little less space efficient.
             case "uchar":
@@ -118,12 +113,13 @@ public class PLYLoader {
         }
     }
 
+    // Parses element string and returns element with name and length
     private static Element parseElement(String line) {
         String[] elementString = line.split(" ");
-        System.out.println("Element: " + elementString[1] + " : "+ elementString[2]);
         return new Element(elementString[1], Integer.valueOf(elementString[2]));
     }
 
+    // Special case for when a property is a list
     private static void parsePropertyList(Element element, String[] line) {
         switch (line[3]) {
             case "char":                                                                // These are all treated as ints. No data is lost, it's just a little less space efficient.
@@ -141,17 +137,5 @@ public class PLYLoader {
                 element.addProperty(line[4], new PropertyList<ArrayList, Double>(ArrayList.class, Double.class));
                 break;
         }
-
     }
-
-//    private static float[] parseVertex(String line) {
-//        String[] vectorStr = line.split(" ");
-//        return new float[]{Float.valueOf(vectorStr[1]), Float.valueOf(vectorStr[2]), Float.valueOf(vectorStr[3])};
-//    }
-//
-//    private static int[] parseFace(String line) {               // Assumes no normals
-//        List<String> face = new ArrayList<>(Arrays.asList(line.split(" ")));
-//        face.remove(0);
-//        return face.stream().mapToInt(Integer::parseInt).toArray();
-//    }
 }

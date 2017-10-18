@@ -2,6 +2,7 @@ package utility.PLY;
 
 import java.util.ArrayList;
 
+// A generic class for storing and converting property data within an element
 public class Property<T> {
     private Class<T> type;
     private ArrayList<T> data;
@@ -23,6 +24,7 @@ public class Property<T> {
         return convert(string, this.type);
     }
 
+    // Converts a string containing this classes data to the correct type, used when adding data
     public <S> S convert(String string, Class<S> type) throws TypeException {
         if(type.equals(Integer.class)) {
             return (S) Integer.valueOf(string);
@@ -32,8 +34,6 @@ public class Property<T> {
             return (S) Double.valueOf(string);
         } else if (type.equals(Short.class)) {
             return (S) Short.valueOf(string);
-        } else if (type.equals(Integer[].class)){
-            throw new TypeException("K");
         } else {
             throw new TypeException("Unknown Type" + type);
         }

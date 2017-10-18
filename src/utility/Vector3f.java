@@ -2,6 +2,7 @@ package utility;
 
 import java.util.ArrayList;
 
+// Contains functions for dealing with vectors
 public class Vector3f {
 
     public static float[] calculateNormal(ArrayList<float[]> face) {
